@@ -210,10 +210,10 @@ export default function Home() {
           <h1 className="text-2xl font-bold">Film Shot Logger</h1>
           <div className="flex items-center gap-4">
             <Select value={storageMode} onValueChange={(value: "download" | "github") => setStorageMode(value)}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg">
                 <SelectItem value="download">Download</SelectItem>
                 <SelectItem value="github">GitHub</SelectItem>
               </SelectContent>
