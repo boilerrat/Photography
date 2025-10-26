@@ -1,0 +1,204 @@
+---
+alwaysApply: true
+---
+# Cursor Rules for Film Shot Logger
+
+## Scope
+You are building a Next.js 14 app with shadcn UI to log film rolls and shots. Store data as Markdown with YAML front matter. Offer download and GitHub save. Allow GitHub import and file import. Support per-shot images via Imgur or pasted URL. Include dates for roll and each shot. Include light and dark mode. No database.
+
+## Top priorities
+- Keep UI simple and fast on phone.
+- Safe token usage. Never expose secrets to the client.
+- Strong typing. No `any`.
+- Clean, commented code.
+- Small PRs.
+
+## Tech stack
+- Next.js 14 App Router. TypeScript.
+- Tailwind. shadcn/ui.
+- next-themes for theme.
+- zod for validation.
+- gray-matter for Markdown.
+- Vercel serverless routes.
+
+## Env vars
+- GITHUB_REPO. owner/name.
+- GITHUB_TOKEN. fine grained PAT, contents write.
+- GITHUB_BRANCH. main.
+- IMGUR_CLIENT_ID. for anonymous uploads.
+
+## Directory layout
+- app/page.tsx. Main UI.
+- app/api/save/route.ts. POST. download or GitHub.
+- app/api/import-github/route.ts. GET. raw file.
+- app/api/upload-image/route.ts. POST. multipart to Imgur.
+- app/api/health/route.ts. GET.
+- components/ui. shadcn components.
+- lib/markdown.ts. toMarkdown, parseMarkdown.
+- lib/filename.ts. slug and filename helpers.
+- types.ts. RollDoc, RollMeta, Shot.
+
+## Data model
+RollMeta
+- rollId. string
+- date. YYYY-MM-DD
+- camera. string
+- lens. string
+- filmStock. string
+- ratedISO. string
+- meterISO. string
+- exposures. number
+
+Shot
+- shotNumber. number
+- date. YYYY-MM-DD or ISO timestamp
+- filmSpeed. string
+- aperture. string
+- exposureAdjustments. string
+- notes. string
+- imageUrl. string
+
+RollDoc
+- meta. RollMeta
+- shots. Shot[]
+
+## Markdown schema
+Front matter
+```yaml
+---
+rollId: "2025-10-26-hp5-kincardine-night"
+date: "2025-10-26"
+camera: "Canon AE-1 Program"
+lens: "FD 50/1.8"
+filmStock: "Ilford HP5"
+ratedISO: "800"
+meterISO: "800"
+exposures: 36
+---
+```
+Body
+```
+# Shots
+
+## Shot 1
+Date: 2025-10-26
+Film Speed: 800
+Aperture: f/2.8
+Exposure Adjustments: 1/60s, +1 EV, Y2 filter
+Notes: Streetlamp by harbour
+Image: https://i.imgur.com/abcd123.jpg
+```
+
+## UI rules
+- Use shadcn components: Button, Input, Textarea, Label, Select, Card, Popover, Calendar, Switch, DropdownMenu.
+- Date inputs use Calendar inside a Popover. Save as YYYY-MM-DD.
+- Provide theme toggle in header using next-themes. defaultTheme system.
+- Large tap targets. Clear labels.
+- Shots list shows a small image thumbnail when imageUrl present.
+
+## Validation
+- exposures 1..72.
+- shotNumber 1..exposures.
+- roll date required.
+- shot date optional.
+- Safe URLs only for imageUrl.
+
+## Access control
+- No auth. Keep tokens only on server.
+- Calls to GitHub and Imgur done in route handlers.
+
+## API details
+POST /api/save
+- Body { doc, storageMode }. storageMode is "download" or "github".
+- download returns { filename, content }.
+- github writes to `rolls/<filename>.md` on branch GITHUB_BRANCH. Returns { html_url }.
+
+GET /api/import-github?path=rolls/<filename>.md
+- Returns { content } raw markdown.
+
+POST /api/upload-image
+- Multipart form field name "file".
+- Upload to Imgur with IMGUR_CLIENT_ID. Return { url }.
+
+## Theme
+- next-themes. ThemeProvider at root.
+- Light and dark support. Respect system.
+
+## shadcn installation
+- Tailwind configured.
+- Add shadcn CLI and components.
+Commands
+```
+npx shadcn@latest init
+npx shadcn@latest add button input textarea label select card popover calendar switch dropdown-menu
+```
+- Use the date picker recipe from shadcn docs. Wrap in a controlled component that outputs YYYY-MM-DD.
+
+## MCP for Cursor
+Add shadcn MCP to enable component scaffolding.
+
+cursor.json
+```json
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    }
+  }
+}
+```
+
+## Coding standards
+- TypeScript strict. No implicit any.
+- React Server Components by default. Mark client code with `"use client"` only when needed.
+- Components in components/ not in app/.
+- Keep functions small. Add JSDoc for exported functions.
+- Descriptive names.
+- No dead code.
+
+## Accessibility
+- Labels bound to inputs.
+- Keyboard support for popovers and calendar.
+- Focus rings visible.
+- Thumbnails have alt text.
+
+## Performance
+- Lazy load date picker.
+- Avoid unnecessary client state.
+- Minimal dependencies.
+
+## Testing
+- Unit test lib/markdown.ts.
+- Route handler smoke tests.
+- Manual E2E on phone.
+
+## Commit style
+- Conventional commits.
+Examples
+- feat: add roll date to front matter
+- fix: validate exposures upper bound
+- chore: add theme provider
+
+## Tasks for Cursor
+1. Scaffold project with Next.js TS. Tailwind. next-themes.
+2. Install shadcn and components listed.
+3. Implement lib/markdown.ts with toMarkdown and parseMarkdown supporting dates and imageUrl.
+4. Build app/layout.tsx with ThemeProvider. Header with ThemeToggle and storage select.
+5. Build app/page.tsx forms using shadcn. Roll fields and New Shot fields. Calendar date pickers.
+6. Build Shots list with Card. Thumb preview when imageUrl is present.
+7. Build API routes: save, import-github, upload-image, health.
+8. Wire download and GitHub save. Add filename helper.
+9. Add file import and GitHub import flows.
+10. Add zod validation and toasts for errors.
+11. Test on Vercel preview. Fix regressions.
+
+## Do
+- Ask one concise question only when blocked.
+- Keep changes small and self contained.
+- Write comments where logic is non obvious.
+
+## Do not
+- Add a database.
+- Expose secrets in client.
+- Pull in large UI libs.
