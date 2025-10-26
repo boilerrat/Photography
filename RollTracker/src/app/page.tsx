@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { RollDoc, RollMeta, Shot } from "@/types";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DatePicker } from "@/components/date-picker";
+import { FilmRollProgress } from "@/components/film-roll-progress";
+import { Lightbox } from "@/components/lightbox";
+import { StatsDashboard } from "@/components/stats-dashboard";
 import { parseMarkdown } from "@/lib/markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Plus, Trash2, Download, Github } from "lucide-react";
+import { Upload, Plus, Trash2, Download, Github, Camera, Film } from "lucide-react";
+import { ApertureIcon, ShutterButtonIcon, FilmRewindIcon, LightMeterIcon, FilmStripIcon, CameraLensIcon } from "@/components/camera-icons";
 
 export default function Home() {
   const [rollDoc, setRollDoc] = useState<RollDoc>({
@@ -39,6 +44,8 @@ export default function Home() {
   });
 
   const [storageMode, setStorageMode] = useState<"download" | "github">("download");
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const handleRollMetaChange = (field: keyof RollMeta, value: string | number) => {
     setRollDoc(prev => ({
@@ -77,7 +84,7 @@ export default function Home() {
 
     // Reset form and set next shot number
     setNewShot({
-      shotNumber: Math.max(...prev.shots.map(s => s.shotNumber), 0) + 1,
+      shotNumber: Math.max(...rollDoc.shots.map(s => s.shotNumber), 0) + 1,
       date: "",
       filmSpeed: "",
       aperture: "",
@@ -156,7 +163,7 @@ export default function Home() {
   };
 
   const handleImportGitHub = async () => {
-    const path = prompt("Enter GitHub file path (e.g., rolls/2025-01-01-hp5-example.md):");
+    const path = prompt("Enter GitHub file path (default: film-shot-log.md):", "film-shot-log.md");
     if (!path) return;
 
     try {
@@ -204,10 +211,22 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Film Shot Logger</h1>
+      {/* Skip to content link for accessibility */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      
+      {/* Main App Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="relative z-10"
+      >
+        {/* Header */}
+        <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 className="text-2xl font-display font-bold">Film Shot Logger</h1>
           <div className="flex items-center gap-4">
             <Select value={storageMode} onValueChange={(value: "download" | "github") => setStorageMode(value)}>
               <SelectTrigger className="w-32 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
@@ -223,7 +242,22 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div id="main-content" className="container mx-auto px-4 py-8">
+        {/* Statistics Dashboard */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mb-12"
+        >
+          <StatsDashboard
+            totalRolls={1} // This would be calculated from all rolls
+            totalShots={rollDoc.shots.length}
+            averageShotsPerRoll={rollDoc.shots.length}
+            mostUsedFilmStock={rollDoc.meta.filmStock || "None"}
+          />
+        </motion.div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Roll Form */}
           <Card>
@@ -253,7 +287,10 @@ export default function Home() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="camera">Camera</Label>
+                  <Label htmlFor="camera" className="flex items-center gap-2">
+                    <Camera className="w-4 h-4" />
+                    Camera
+                  </Label>
                   <Input
                     id="camera"
                     value={rollDoc.meta.camera}
@@ -262,7 +299,10 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lens">Lens</Label>
+                  <Label htmlFor="lens" className="flex items-center gap-2">
+                    <CameraLensIcon className="w-4 h-4" />
+                    Lens
+                  </Label>
                   <Input
                     id="lens"
                     value={rollDoc.meta.lens}
@@ -274,7 +314,10 @@ export default function Home() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="filmStock">Film Stock</Label>
+                  <Label htmlFor="filmStock" className="flex items-center gap-2">
+                    <FilmStripIcon className="w-4 h-4" />
+                    Film Stock
+                  </Label>
                   <Input
                     id="filmStock"
                     value={rollDoc.meta.filmStock}
@@ -283,7 +326,10 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="exposures">Exposures</Label>
+                  <Label htmlFor="exposures" className="flex items-center gap-2">
+                    <Film className="w-4 h-4" />
+                    Exposures
+                  </Label>
                   <Input
                     id="exposures"
                     type="number"
@@ -297,7 +343,10 @@ export default function Home() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="ratedISO">Rated ISO</Label>
+                  <Label htmlFor="ratedISO" className="flex items-center gap-2">
+                    <LightMeterIcon className="w-4 h-4" />
+                    Rated ISO
+                  </Label>
                   <Input
                     id="ratedISO"
                     value={rollDoc.meta.ratedISO}
@@ -306,7 +355,10 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="meterISO">Meter ISO</Label>
+                  <Label htmlFor="meterISO" className="flex items-center gap-2">
+                    <ApertureIcon className="w-4 h-4" />
+                    Meter ISO
+                  </Label>
                   <Input
                     id="meterISO"
                     value={rollDoc.meta.meterISO}
@@ -315,6 +367,13 @@ export default function Home() {
                   />
                 </div>
               </div>
+
+              {/* Film Roll Progress */}
+              <FilmRollProgress 
+                currentShots={rollDoc.shots.length} 
+                totalExposures={rollDoc.meta.exposures} 
+                className="mb-4"
+              />
 
               <div className="flex gap-2">
                 <Button onClick={handleSave} className="flex-1">
@@ -374,7 +433,10 @@ export default function Home() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="filmSpeed">Film Speed</Label>
+                    <Label htmlFor="filmSpeed" className="flex items-center gap-2">
+                      <LightMeterIcon className="w-4 h-4" />
+                      Film Speed
+                    </Label>
                     <Input
                       id="filmSpeed"
                       value={newShot.filmSpeed || ""}
@@ -383,7 +445,10 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="aperture">Aperture</Label>
+                    <Label htmlFor="aperture" className="flex items-center gap-2">
+                      <ApertureIcon className="w-4 h-4" />
+                      Aperture
+                    </Label>
                     <Input
                       id="aperture"
                       value={newShot.aperture || ""}
@@ -394,7 +459,10 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <Label htmlFor="exposureAdjustments">Exposure Adjustments</Label>
+                  <Label htmlFor="exposureAdjustments" className="flex items-center gap-2">
+                    <ShutterButtonIcon className="w-4 h-4" />
+                    Exposure Adjustments
+                  </Label>
                   <Input
                     id="exposureAdjustments"
                     value={newShot.exposureAdjustments || ""}
@@ -440,8 +508,8 @@ export default function Home() {
                 </div>
 
                 <Button onClick={addShot} className="w-full">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Shot
+                  <ShutterButtonIcon className="w-4 h-4 mr-2" />
+                  Capture Shot
                 </Button>
               </CardContent>
             </Card>
@@ -459,32 +527,112 @@ export default function Home() {
                 ) : (
                   <div className="space-y-3">
                     {rollDoc.shots.map((shot) => (
-                      <div key={shot.shotNumber} className="flex items-start gap-3 p-3 border rounded-lg">
-                        {shot.imageUrl && (
-                          <img
-                            src={shot.imageUrl}
-                            alt={`Shot ${shot.shotNumber}`}
-                            className="w-16 h-16 object-cover rounded"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-medium">Shot {shot.shotNumber}</h4>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeShot(shot.shotNumber)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                      <motion.div
+                        key={shot.shotNumber}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="group relative"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.2}
+                        onDragEnd={(_, info) => {
+                          if (info.offset.x > 100) {
+                            removeShot(shot.shotNumber);
+                          }
+                        }}
+                      >
+                        <div className="flex items-start gap-3 p-4 border rounded-lg bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-200 hover:shadow-lg">
+                          {/* Film Frame Number */}
+                          <div className="absolute -left-2 top-2 w-4 h-6 bg-foreground text-background text-xs font-mono flex items-center justify-center rounded-sm shadow-sm">
+                            {shot.shotNumber}
                           </div>
-                          {shot.date && <p className="text-sm text-muted-foreground">{shot.date}</p>}
-                          {shot.filmSpeed && <p className="text-sm">Speed: {shot.filmSpeed}</p>}
-                          {shot.aperture && <p className="text-sm">Aperture: {shot.aperture}</p>}
-                          {shot.exposureAdjustments && <p className="text-sm">Adjustments: {shot.exposureAdjustments}</p>}
-                          {shot.notes && <p className="text-sm">{shot.notes}</p>}
+                          
+                          {/* Sprocket Holes */}
+                          <div className="absolute -left-1 top-0 bottom-0 w-1 flex flex-col justify-between py-2">
+                            <div className="w-1 h-1 bg-border rounded-full"></div>
+                            <div className="w-1 h-1 bg-border rounded-full"></div>
+                            <div className="w-1 h-1 bg-border rounded-full"></div>
+                            <div className="w-1 h-1 bg-border rounded-full"></div>
+                          </div>
+                          <div className="absolute -right-1 top-0 bottom-0 w-1 flex flex-col justify-between py-2">
+                            <div className="w-1 h-1 bg-border rounded-full"></div>
+                            <div className="w-1 h-1 bg-border rounded-full"></div>
+                            <div className="w-1 h-1 bg-border rounded-full"></div>
+                            <div className="w-1 h-1 bg-border rounded-full"></div>
+                          </div>
+                          
+                          {shot.imageUrl && (
+                            <div 
+                              className="relative cursor-pointer group"
+                              onClick={() => {
+                                const imageUrls = rollDoc.shots
+                                  .filter(s => s.imageUrl)
+                                  .map(s => s.imageUrl!);
+                                const imageIndex = imageUrls.indexOf(shot.imageUrl!);
+                                setLightboxIndex(imageIndex);
+                                setLightboxOpen(true);
+                              }}
+                            >
+                              <img
+                                src={shot.imageUrl}
+                                alt={`Shot ${shot.shotNumber}`}
+                                className="w-16 h-16 object-cover rounded border-2 border-border shadow-sm group-hover:shadow-lg transition-shadow duration-200"
+                              />
+                              {/* Vintage photo corner mounts */}
+                              <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-primary/50 rounded-tl-lg"></div>
+                              <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-primary/50 rounded-tr-lg"></div>
+                              <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-primary/50 rounded-bl-lg"></div>
+                              <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-primary/50 rounded-br-lg"></div>
+                              {/* Hover overlay */}
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center">
+                                <ZoomIn className="w-4 h-4 text-white" />
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0 ml-2">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-display font-semibold text-lg">Shot {shot.shotNumber}</h4>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeShot(shot.shotNumber)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            {shot.date && <p className="text-sm text-muted-foreground font-mono">{shot.date}</p>}
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                              {shot.filmSpeed && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs text-muted-foreground">Speed:</span>
+                                  <span className="text-sm font-mono">{shot.filmSpeed}</span>
+                                </div>
+                              )}
+                              {shot.aperture && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs text-muted-foreground">Aperture:</span>
+                                  <span className="text-sm font-mono">{shot.aperture}</span>
+                                </div>
+                              )}
+                            </div>
+                            {shot.exposureAdjustments && (
+                              <p className="text-sm mt-1 font-mono text-muted-foreground">
+                                {shot.exposureAdjustments}
+                              </p>
+                            )}
+                            {shot.notes && (
+                              <p className="text-sm mt-2 italic text-muted-foreground">
+                                "{shot.notes}"
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
@@ -492,7 +640,17 @@ export default function Home() {
             </Card>
           </div>
         </div>
-      </div>
+        </div>
+      </motion.div>
+
+      {/* Lightbox */}
+      <Lightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        images={rollDoc.shots.filter(s => s.imageUrl).map(s => s.imageUrl!)}
+        currentIndex={lightboxIndex}
+        onIndexChange={setLightboxIndex}
+      />
     </div>
   );
 }

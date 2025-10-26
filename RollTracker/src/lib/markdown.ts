@@ -51,6 +51,72 @@ export function toMarkdown(doc: RollDoc): string {
 }
 
 /**
+ * Converts a RollDoc to a roll entry for the consolidated file
+ */
+export function toRollEntry(doc: RollDoc): string {
+  const { meta, shots } = doc;
+  
+  let entry = `# Roll: ${meta.rollId || 'Untitled'}\n`;
+  entry += `**Date:** ${meta.date || 'Not specified'}\n`;
+  entry += `**Camera:** ${meta.camera || 'Not specified'}\n`;
+  entry += `**Lens:** ${meta.lens || 'Not specified'}\n`;
+  entry += `**Film Stock:** ${meta.filmStock || 'Not specified'}\n`;
+  entry += `**Rated ISO:** ${meta.ratedISO || 'Not specified'}\n`;
+  entry += `**Meter ISO:** ${meta.meterISO || 'Not specified'}\n`;
+  entry += `**Exposures:** ${meta.exposures || 36}\n\n`;
+  
+  if (shots.length > 0) {
+    entry += `## Shots (${shots.length})\n\n`;
+    
+    shots.forEach((shot) => {
+      entry += `### Shot ${shot.shotNumber}\n`;
+      
+      if (shot.date) {
+        entry += `- **Date:** ${shot.date}\n`;
+      }
+      if (shot.filmSpeed) {
+        entry += `- **Film Speed:** ${shot.filmSpeed}\n`;
+      }
+      if (shot.aperture) {
+        entry += `- **Aperture:** ${shot.aperture}\n`;
+      }
+      if (shot.exposureAdjustments) {
+        entry += `- **Exposure Adjustments:** ${shot.exposureAdjustments}\n`;
+      }
+      if (shot.notes) {
+        entry += `- **Notes:** ${shot.notes}\n`;
+      }
+      if (shot.imageUrl) {
+        entry += `- **Image:** [View Image](${shot.imageUrl})\n`;
+      }
+      
+      entry += '\n';
+    });
+  } else {
+    entry += `## Shots (0)\n\n*No shots logged yet*\n\n`;
+  }
+  
+  entry += '---\n\n';
+  
+  return entry;
+}
+
+/**
+ * Appends a roll entry to existing content
+ */
+export function appendRollToContent(existingContent: string, newRoll: RollDoc): string {
+  const rollEntry = toRollEntry(newRoll);
+  
+  // If content is empty, start with a header
+  if (!existingContent.trim()) {
+    return `# Film Shot Log\n\n*Generated on ${new Date().toLocaleDateString()}*\n\n${rollEntry}`;
+  }
+  
+  // Append the new roll entry
+  return existingContent + rollEntry;
+}
+
+/**
  * Parses Markdown content to extract RollDoc
  */
 export function parseMarkdown(content: string): RollDoc {

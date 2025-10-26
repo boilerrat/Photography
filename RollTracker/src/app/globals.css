@@ -4,47 +4,175 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Vintage Film Photography Color Palette */
+    --background: 45 25% 95%; /* Aged paper white */
+    --foreground: 20 15% 15%; /* Vintage black */
+    --card: 45 20% 98%; /* Cream paper */
+    --card-foreground: 20 15% 15%;
+    --popover: 45 20% 98%;
+    --popover-foreground: 20 15% 15%;
+    --primary: 35 85% 45%; /* Kodak gold */
+    --primary-foreground: 45 25% 95%;
+    --secondary: 25 30% 85%; /* Sepia tone */
+    --secondary-foreground: 20 15% 15%;
+    --muted: 25 20% 90%;
+    --muted-foreground: 20 10% 40%;
+    --accent: 35 85% 45%; /* Kodak gold accent */
+    --accent-foreground: 45 25% 95%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 45 25% 95%;
+    --border: 25 20% 80%; /* Vintage border */
+    --input: 25 20% 90%;
+    --ring: 35 85% 45%;
     --radius: 0.5rem;
+    
+    /* Film Stock Colors */
+    --kodak-gold: 35 85% 45%;
+    --fuji-green: 120 40% 35%;
+    --ilford-silver: 0 0% 60%;
+    --film-grain: 20 10% 20%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Darkroom Aesthetic */
+    --background: 0 0% 8%; /* Darkroom black */
+    --foreground: 0 0% 90%; /* Safelight white */
+    --card: 0 0% 12%; /* Dark card */
+    --card-foreground: 0 0% 90%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 90%;
+    --primary: 0 70% 60%; /* Red safelight */
+    --primary-foreground: 0 0% 8%;
+    --secondary: 0 0% 20%; /* Dark gray */
+    --secondary-foreground: 0 0% 90%;
+    --muted: 0 0% 25%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 70% 60%; /* Red safelight accent */
+    --accent-foreground: 0 0% 8%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 90%;
+    --border: 0 0% 25%;
+    --input: 0 0% 20%;
+    --ring: 0 70% 60%;
+    
+    /* Darkroom Colors */
+    --safelight-red: 0 70% 60%;
+    --darkroom-black: 0 0% 8%;
+    --film-grain: 0 0% 15%;
+  }
+}
+
+/* Film Grain Texture & Layered Backgrounds */
+@layer base {
+  body {
+    background: 
+      /* Light leak effects */
+      radial-gradient(ellipse at 20% 20%, rgba(255, 165, 0, 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(255, 69, 0, 0.08) 0%, transparent 50%),
+      /* Film grain texture */
+      radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0),
+      /* Vintage paper texture */
+      linear-gradient(45deg, transparent 25%, rgba(0,0,0,0.02) 25%, rgba(0,0,0,0.02) 50%, transparent 50%, transparent 75%, rgba(0,0,0,0.02) 75%);
+    background-size: 20px 20px, 20px 20px, 20px 20px, 40px 40px;
+    background-attachment: fixed;
+    position: relative;
+  }
+  
+  .dark body {
+    background: 
+      /* Darkroom light leak effects */
+      radial-gradient(ellipse at 20% 20%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(255, 100, 100, 0.08) 0%, transparent 50%),
+      /* Film grain texture */
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0),
+      /* Darkroom texture */
+      linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.02) 50%, transparent 50%, transparent 75%, rgba(255,255,255,0.02) 75%);
+    background-size: 20px 20px, 20px 20px, 20px 20px, 40px 40px;
+    background-attachment: fixed;
+  }
+
+  /* Additional texture layers */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      /* Subtle vignette */
+      radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.1) 100%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .dark body::before {
+    background: 
+      /* Darkroom vignette */
+      radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+  }
+}
+
+/* Typography */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+  
+  .font-display {
+    font-family: var(--font-display);
+  }
+  
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+  
+  .font-sans {
+    font-family: var(--font-sans);
+  }
+}
+
+/* Accessibility - Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-pulse,
+  .animate-ping,
+  .animate-bounce {
+    animation: none !important;
+  }
+}
+
+/* Focus Management */
+@layer base {
+  *:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+  
+  /* Skip to content link */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+  }
+  
+  .skip-link:focus {
+    top: 6px;
   }
 }
